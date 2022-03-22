@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% block title -%}
+{% if title %}
+    <title>Велкоме - {{title}}</title>
+{% else %}
+    <title>Велкоме</title>
+{% endif %}
+{% endblock %}
+</head>
+<body>
+{% block content -%}
+    {%- block mainmenu -%}
+<ul>
+    {% for m in menu -%}
+<li>{{m}}</li>
+    {% endfor -%}
+</ul>
+    {% endblock mainmenu -%}
+    {% if title -%}
+<h1>{{title}}</h1>
+    {% else -%}
+<h1>Велкоме</h1>
+    {% endif -%}
+{% endblock -%}
+</body>
+</html>
