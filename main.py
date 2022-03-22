@@ -14,5 +14,13 @@ def about():
     print( url_for('about'))
     return render_template('about.html', title="Хто я!", menu=menu)
 
+@app.route("/profile/<username>")
+def profile(username, path):
+    return f"Пользователь: {username}, {path}"
+
+'''
+with app.test_request_context():
+    print( url_for('about') )'''
+
 if __name__ == '__main__':
     app.run(debug=True)
