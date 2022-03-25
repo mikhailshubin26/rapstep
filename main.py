@@ -1,9 +1,8 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, flash
 import sqlite3
 
 app = Flask(__name__)
-
-
+app.config['SECRET_KEY'] = 'emyKFWDVMQwGjzv5dgfhHgot12nsrhiNZ'
 
 menu = [{"name": "Главная", "url" : "main"},
 {"name": "МЫ - ", "url" : "about"},
@@ -29,15 +28,21 @@ def profile(username):
 
 @app.route("/contact", methods=["POST", "GET"])
 def contact():
+
     if request.method == 'POST':
-        con = sqlite3.connect("users.sqlite")
-        cur = con.cursor()
-        us = request.form['username']
-        em = request.form['email']
-        ms = request.form['message']
-        cur.execute(f'INSERT INTO asks (username, email, message) VALUES ("{us}", "{em}", "{ms}")')
-        con.commit()
-        cur.close()
+        if len(request.form['username']) > 2:
+            flash('Сообщение отправлено', category='success')
+            con = sqlite3.connect("users.sqlite")
+            cur = con.cursor()
+            us = request.form['username']
+            em = request.form['email']
+            ms = request.form['message']
+            cur.execute(f'INSERT INTO asks (username, email, message) VALUES ("{us}", "{em}", "{ms}")')
+            con.commit()
+            cur.close()
+        else:
+            flash('Ошибка отправки. Слишком мало символов в имени', category='error')
+
 
     return render_template('contact.html', title = 'Обратная связь', menu=menu)
 
