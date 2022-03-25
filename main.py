@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 
 
-menu = [{"name": "ХЛАВНАЯ", "url" : "main"},
+menu = [{"name": "Главная", "url" : "main"},
 {"name": "МЫ - ", "url" : "about"},
 {"name" : "ЧЕКАНУТЬ ПРОФИЛЬ", "url" : "/profile/leeroii"},
 {"name" : "КАНТА АКТЫ", "url" : "/contact"}]
@@ -35,7 +35,7 @@ def contact():
         us = request.form['username']
         em = request.form['email']
         ms = request.form['message']
-        cur.execute(f"INSERT INTO asks (username, email, message) VALUES ({us}, {em}, {ms})")
+        cur.execute(f'INSERT INTO asks (username, email, message) VALUES ("{us}", "{em}", "{ms}")')
         con.commit()
         cur.close()
 
