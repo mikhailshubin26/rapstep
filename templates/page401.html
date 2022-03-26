@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+<p>Це не твоя страница, братец. Вернутся на <a href="{{url_for('login')}}">свою страницу</a>
+{% endblock %}
