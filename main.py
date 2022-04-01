@@ -1,13 +1,16 @@
 from flask import Flask, render_template, url_for, request, flash, session, redirect, abort
 import sqlite3
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'emyKFWDVMQwGjzv5dgfhHgot12nsrhiNZ'
 
 menu = [{"name": "Главная", "url" : "main"},
 {"name": "МЫ - ", "url" : "about"},
-{"name" : "ЧЕКАНУТЬ ПРОФИЛЬ", "url" : "/profile/leeroii"},
-{"name" : "КАНТА АКТЫ", "url" : "/contact"}]
+{"name" : "ЧЕКАНУТЬ ПРОФИЛЬ", "url" : "/profile/imichael"},
+{"name" : "КАНТА АКТЫ", "url" : "/contact"},
+{"name" : "Войти", "url" : "/login"},
+{"name" : "Правила", "url" : "/rules"}]
 
 @app.route("/")
 @app.route("/main")
@@ -16,9 +19,12 @@ def index():
     return render_template('index.html', menu=menu)
 
 
-@app.route("/about")
+@app.route("/about", methods=['POST', 'GET'])
 def about():
     print(url_for('about'))
+    if request.method == 'POST':
+        return redirect(url_for('profile', username=session['userLogged']))
+
     return render_template('about.html', title="Хто я!", menu=menu)
 
 
@@ -66,6 +72,10 @@ def login():
         return redirect(url_for('profile', username=session['userLogged']))
 
     return render_template('login.html', title='Авторизация')
+
+@app.route("/rules")
+def rules():
+    return render_template('rules.html', title='Правила платформы')
 '''
 with app.test_request_context():
     print( url_for('about') )'''
