@@ -8,7 +8,7 @@ app.config['SECRET_KEY'] = 'emyKFWDVMQwGjzv5dgfhHgot12nsrhiNZ'
 manager = LoginManager()
 
 menu = [{"name": "Главная", "url": "main"},
-        {"name": "ЧЕКАНУТЬ ПРОФИЛЬ", "url": "/profile/imichael"},
+        {"name": "ЧЕКАНУТЬ ПРОФИЛЬ", "url": "/profile"},
         {"name": "КАНТА АКТЫ", "url": "/contact"},
         {"name": "Правила", "url": "/rules"},
         {"name": "Войти", "url": "/login"},
@@ -25,12 +25,26 @@ def main():
         return render_template('main.html', menu=menu)
 
 
-'''@app.route("/profile/<username>")
-def profile(username):
-    if 'userLogged' not in session or session['userLogged'] != username:
-        abort(401)
+@app.route("/profile", methods=["POST", "GET"])
+def profile():
+    if 'userLogged' not in session:
+        return redirect(url_for('login'))
+    else:
+        print(url_for('profile'))
+        if request.method == 'POST':
+            con = sqlite3.connect("users.sqlite")
+            cur = con.cursor()
+            search = cur.execute("""SELECT * FROM persons""")
+            for el in search:
+                if el[1] == request.form['username']:
+                    print("SHALOM")
+                    return redirect(f"person/{request.form['username']}")
+        return render_template('profile.html', menu=menu)
 
-    return f"Пользователь: {username}"'''
+
+@app.route("/person")
+def man():
+    return f"Пользователь: "
 
 
 @app.route("/contact", methods=["POST", "GET"])
@@ -81,7 +95,7 @@ def login():
                 if el[1] == request.form['username'] and request.form['psw'] == el[2]:
                     session['userLogged'] = request.form['username']
                     return redirect(url_for('main', username=session['userLogged']))
-                print('Неверный логин или пароль')
+                flash('Неверный логин или пароль')
 
     # elif request.method == 'POST' and request.form['username'] == 'imichael' and request.form['psw'] == "123":
     #   session['userLogged'] = request.form['username']
@@ -120,6 +134,7 @@ def logout():
     del session['userLogged']
     return redirect(url_for('login'))
 
+
 @app.route("/reg", methods=["GET", "POST"])
 def reg():
     if request.method == 'POST':
@@ -137,6 +152,7 @@ def reg():
                 lg = request.form['username']
                 ps = request.form['password']
                 cur.execute(f'INSERT INTO users (login, password) VALUES ("{lg}", "{ps}")')
+                cur.execute(f'INSERT INTO persons (own) VALUES ("{lg}")')
                 con.commit()
                 cur.close()
                 return redirect(url_for('login'))
@@ -145,7 +161,7 @@ def reg():
                 flash('Логин уже занят')
         else:
             flash('Пароли не совпадают')
-    return render_template('reg.html', title='Зарегистрироваться', menu=menu)
+    return render_template('reg.html', title='Зарегистрироваться')
 
 
 '''
