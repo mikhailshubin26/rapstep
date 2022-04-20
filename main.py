@@ -26,7 +26,7 @@ def main():
         print(url_for('main'))
         return render_template('main.html', menu=menu)
     else:
-        return redirect(url_for('log_in'))
+        return redirect(url_for('login'))
 
 
 @app.route("/about", methods=['POST', 'GET'])
@@ -38,7 +38,7 @@ def about():
 
         return render_template('about.html', title="Хто я!", menu=menu)
     else:
-        return redirect(url_for('log_in'))
+        return redirect(url_for('login'))
 
 
 '''@app.route("/profile/<username>")
@@ -68,7 +68,7 @@ def contact():
 
         return render_template('contact.html', title='Обратная связь', menu=menu)
     else:
-        return redirect(url_for('log_in'))
+        return redirect(url_for('login'))
 
 
 @app.errorhandler(404)
@@ -81,15 +81,29 @@ def pageNotYour(error):
     return render_template('page401.html', title='401', menu=menu), 401
 
 
-'''@app.route("/login", methods=["POST", "GET"])
+@app.route("/")
+@app.route("/login", methods=["POST", "GET"])
 def login():
-    if 'userLogged' in session:
-        return redirect(url_for('profile', username=session['userLogged']))
-    elif request.method == 'POST' and request.form['username'] == 'imichael' and request.form['psw'] == "123":
-        session['userLogged'] = request.form['username']
-        return redirect(url_for('index', username=session['userLogged']))
+    if request.method == 'POST':
+        if 'userLogged' in session:
+            print('Hi')
+            return redirect(url_for('main', username=session['userLogged']))
+        else:
+            con = sqlite3.connect("users.sqlite")
+            cur = con.cursor()
+            result = cur.execute("""SELECT * FROM users""").fetchall()
+            con.commit()
+            bl = False
+            for el in result:
+                if el[1] == request.form['username'] and el[2] == request.form["password"]:
+                    bl = True
+            if bl:
+                aut = True
+                print(el[1], el[2])
+                if request.method == 'GET':
+                    return redirect(url_for("main"), 304)
 
-    return render_template('login.html', title='Авторизация')'''
+    return render_template('log.html', title='Авторизация')
 
 
 @app.route("/rules")
@@ -97,7 +111,7 @@ def rules():
     return render_template('rules.html', title='Правила платформы', menu=menu)
 
 
-@app.route("/")
+'''
 @app.route("/login", methods=["GET", "POST"])
 def log_in():
     if request.method == 'POST':
@@ -111,11 +125,10 @@ def log_in():
                 bl = True
         if bl:
             aut = True
-            id = el[0]
-            prof = el[1]
+            print(el[1], el[2])
             return redirect(url_for('main'))
 
-    return render_template('log.html', title='Войти', menu=menu)
+    return render_template('log.html', title='Войти', menu=menu)'''
 
 
 @app.route("/logout", methods=["GET", "POST"])
@@ -129,7 +142,6 @@ def reg():
         con = sqlite3.connect("users.sqlite")
         cur = con.cursor()
     return render_template('reg.html', title='Зарегистрироваться', menu=menu)
-
 
 
 '''
