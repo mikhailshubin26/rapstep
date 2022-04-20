@@ -125,7 +125,10 @@ def logout():
 
 @app.route("/reg", methods=["GET", "POST"])
 def reg():
-    pass
+    if request.method == 'POST':
+        con = sqlite3.connect("users.sqlite")
+        cur = con.cursor()
+    return render_template('reg.html', title='Зарегистрироваться', menu=menu)
 
 
 
