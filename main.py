@@ -10,9 +10,10 @@ manager = LoginManager()
 menu = [{"name": "Главная", "url": "main"},
         {"name": "ЧЕКАНУТЬ ПРОФИЛЬ", "url": "/profile/imichael"},
         {"name": "КАНТА АКТЫ", "url": "/contact"},
-        {"name": "Войти", "url": "/login"},
         {"name": "Правила", "url": "/rules"},
-        {"name": "Зарегистрироваться", "url": "/reg"}]
+        {"name": "Войти", "url": "/login"},
+        {"name": "Зарегистрироваться", "url": "/reg"},
+        {"name": "Выйти", "url": "/logout"}]
 
 
 @app.route("/main")
@@ -116,8 +117,8 @@ def log_in():
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    pass
-
+    del session['userLogged']
+    return redirect(url_for('login'))
 
 @app.route("/reg", methods=["GET", "POST"])
 def reg():
@@ -131,16 +132,19 @@ def reg():
                 flag = False
             else:
                 continue
+        if request.form['password'] == request.form['corpassword']:
+            if flag:
+                lg = request.form['username']
+                ps = request.form['password']
+                cur.execute(f'INSERT INTO users (login, password) VALUES ("{lg}", "{ps}")')
+                con.commit()
+                cur.close()
+                return redirect(url_for('login'))
 
-        if flag:
-            lg = request.form['username']
-            ps = request.form['password']
-            cur.execute(f'INSERT INTO users (login, password) VALUES ("{lg}", "{ps}")')
-            con.commit()
-            cur.close()
-            return redirect(url_for('login'))
+            else:
+                flash('Логин уже занят')
         else:
-            flash('Логин уже занят')
+            flash('Пароли не совпадают')
     return render_template('reg.html', title='Зарегистрироваться', menu=menu)
 
 
