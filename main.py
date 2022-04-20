@@ -124,7 +124,23 @@ def reg():
     if request.method == 'POST':
         con = sqlite3.connect("users.sqlite")
         cur = con.cursor()
+        result = cur.execute("""SELECT * FROM users""")
+        flag = True
+        for e in result:
+            if e[1] == request.form['username']:
+                flag = False
+            else:
+                continue
 
+        if flag:
+            lg = request.form['username']
+            ps = request.form['password']
+            cur.execute(f'INSERT INTO users (login, password) VALUES ("{lg}", "{ps}")')
+            con.commit()
+            cur.close()
+            return redirect(url_for('login'))
+        else:
+            flash('Логин уже занят')
     return render_template('reg.html', title='Зарегистрироваться', menu=menu)
 
 
