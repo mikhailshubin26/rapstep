@@ -7,12 +7,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'emyKFWDVMQwGjzv5dgfhHgot12nsrhiNZ'
 manager = LoginManager()
 
-aut = False
-id = None
-prof = None
-
 menu = [{"name": "Главная", "url": "main"},
-        {"name": "МЫ - ", "url": "about"},
         {"name": "ЧЕКАНУТЬ ПРОФИЛЬ", "url": "/profile/imichael"},
         {"name": "КАНТА АКТЫ", "url": "/contact"},
         {"name": "Войти", "url": "/login"},
@@ -22,23 +17,11 @@ menu = [{"name": "Главная", "url": "main"},
 
 @app.route("/main")
 def main():
-    if aut:
+    if 'userLogged' not in session:
+        return redirect(url_for('login'))
+    else:
         print(url_for('main'))
         return render_template('main.html', menu=menu)
-    else:
-        return redirect(url_for('login'))
-
-
-@app.route("/about", methods=['POST', 'GET'])
-def about():
-    if aut:
-        print(url_for('about'))
-        if request.method == 'POST':
-            return redirect(url_for('profile', username=session['userLogged']))
-
-        return render_template('about.html', title="Хто я!", menu=menu)
-    else:
-        return redirect(url_for('login'))
 
 
 '''@app.route("/profile/<username>")
@@ -51,7 +34,9 @@ def profile(username):
 
 @app.route("/contact", methods=["POST", "GET"])
 def contact():
-    if aut:
+    if 'userLogged' not in session:
+        return redirect(url_for('login'))
+    else:
         if request.method == 'POST':
             if len(request.form['username']) > 2:
                 flash('Сообщение отправлено', category='success')
@@ -67,8 +52,6 @@ def contact():
                 flash('Ошибка отправки. Слишком мало символов в имени', category='error')
 
         return render_template('contact.html', title='Обратная связь', menu=menu)
-    else:
-        return redirect(url_for('login'))
 
 
 @app.errorhandler(404)
@@ -84,26 +67,26 @@ def pageNotYour(error):
 @app.route("/")
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    if request.method == 'POST':
-        if 'userLogged' in session:
-            print('Hi')
-            return redirect(url_for('main', username=session['userLogged']))
-        else:
+    if 'userLogged' in session:
+        return redirect(url_for('main'))
+    else:
+        if request.method == 'POST':
             con = sqlite3.connect("users.sqlite")
             cur = con.cursor()
-            result = cur.execute("""SELECT * FROM users""").fetchall()
+            res = cur.execute("""SELECT * FROM users""").fetchall()
             con.commit()
-            bl = False
-            for el in result:
-                if el[1] == request.form['username'] and el[2] == request.form["password"]:
-                    bl = True
-            if bl:
-                aut = True
-                print(el[1], el[2])
-                if request.method == 'GET':
-                    return redirect(url_for("main"), 304)
+            cur.close()
+            for el in res:
+                if el[1] == request.form['username'] and request.form['psw'] == el[2]:
+                    session['userLogged'] = request.form['username']
+                    return redirect(url_for('main', username=session['userLogged']))
+                print('Неверный логин или пароль')
 
-    return render_template('log.html', title='Авторизация')
+    # elif request.method == 'POST' and request.form['username'] == 'imichael' and request.form['psw'] == "123":
+    #   session['userLogged'] = request.form['username']
+    #  return redirect(url_for('index', username=session['userLogged']))
+
+    return render_template('login.html', title='Авторизация')
 
 
 @app.route("/rules")
@@ -111,8 +94,7 @@ def rules():
     return render_template('rules.html', title='Правила платформы', menu=menu)
 
 
-'''
-@app.route("/login", methods=["GET", "POST"])
+'''@app.route("/login", methods=["GET", "POST"])
 def log_in():
     if request.method == 'POST':
         con = sqlite3.connect("users.sqlite")
@@ -125,7 +107,8 @@ def log_in():
                 bl = True
         if bl:
             aut = True
-            print(el[1], el[2])
+            id = [0]
+            prof = el[1]
             return redirect(url_for('main'))
 
     return render_template('log.html', title='Войти', menu=menu)'''
@@ -141,6 +124,7 @@ def reg():
     if request.method == 'POST':
         con = sqlite3.connect("users.sqlite")
         cur = con.cursor()
+
     return render_template('reg.html', title='Зарегистрироваться', menu=menu)
 
 
