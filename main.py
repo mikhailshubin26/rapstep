@@ -30,7 +30,6 @@ def profile():
     if 'userLogged' not in session:
         return redirect(url_for('login'))
     else:
-        print(url_for('profile'))
         if request.method == 'POST':
             con = sqlite3.connect("users.sqlite")
             cur = con.cursor()
@@ -38,7 +37,8 @@ def profile():
             for el in search:
                 if el[1] == request.form['username']:
                     print("SHALOM")
-                    return redirect(f"person/{request.form['username']}")
+                    return redirect("person")
+
         return render_template('profile.html', menu=menu)
 
 
