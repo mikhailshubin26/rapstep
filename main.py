@@ -7,63 +7,79 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'emyKFWDVMQwGjzv5dgfhHgot12nsrhiNZ'
 manager = LoginManager()
 
-menu = [{"name": "Главная", "url" : "main"},
-{"name": "МЫ - ", "url" : "about"},
-{"name" : "ЧЕКАНУТЬ ПРОФИЛЬ", "url" : "/profile/imichael"},
-{"name" : "КАНТА АКТЫ", "url" : "/contact"},
-{"name" : "Войти", "url" : "/login"},
-{"name" : "Правила", "url" : "/rules"}]
+aut = False
+id = None
+prof = None
 
-@app.route("/")
+menu = [{"name": "Главная", "url": "main"},
+        {"name": "МЫ - ", "url": "about"},
+        {"name": "ЧЕКАНУТЬ ПРОФИЛЬ", "url": "/profile/imichael"},
+        {"name": "КАНТА АКТЫ", "url": "/contact"},
+        {"name": "Войти", "url": "/login"},
+        {"name": "Правила", "url": "/rules"},
+        {"name": "Зарегистрироваться", "url": "/reg"}]
+
+
 @app.route("/main")
-def index():
-    print(url_for('index'))
-    return render_template('index.html', menu=menu)
+def main():
+    if aut:
+        print(url_for('main'))
+        return render_template('main.html', menu=menu)
+    else:
+        return redirect(url_for('log_in'))
 
 
 @app.route("/about", methods=['POST', 'GET'])
 def about():
-    print(url_for('about'))
-    if request.method == 'POST':
-        return redirect(url_for('profile', username=session['userLogged']))
+    if aut:
+        print(url_for('about'))
+        if request.method == 'POST':
+            return redirect(url_for('profile', username=session['userLogged']))
 
-    return render_template('about.html', title="Хто я!", menu=menu)
+        return render_template('about.html', title="Хто я!", menu=menu)
+    else:
+        return redirect(url_for('log_in'))
 
 
-@app.route("/profile/<username>")
+'''@app.route("/profile/<username>")
 def profile(username):
     if 'userLogged' not in session or session['userLogged'] != username:
         abort(401)
 
-    return f"Пользователь: {username}"
+    return f"Пользователь: {username}"'''
+
 
 @app.route("/contact", methods=["POST", "GET"])
 def contact():
+    if aut:
+        if request.method == 'POST':
+            if len(request.form['username']) > 2:
+                flash('Сообщение отправлено', category='success')
+                con = sqlite3.connect("users.sqlite")
+                cur = con.cursor()
+                us = request.form['username']
+                em = request.form['email']
+                ms = request.form['message']
+                cur.execute(f'INSERT INTO asks (username, email, message) VALUES ("{us}", "{em}", "{ms}")')
+                con.commit()
+                cur.close()
+            else:
+                flash('Ошибка отправки. Слишком мало символов в имени', category='error')
 
-    if request.method == 'POST':
-        if len(request.form['username']) > 2:
-            flash('Сообщение отправлено', category='success')
-            con = sqlite3.connect("users.sqlite")
-            cur = con.cursor()
-            us = request.form['username']
-            em = request.form['email']
-            ms = request.form['message']
-            cur.execute(f'INSERT INTO asks (username, email, message) VALUES ("{us}", "{em}", "{ms}")')
-            con.commit()
-            cur.close()
-        else:
-            flash('Ошибка отправки. Слишком мало символов в имени', category='error')
+        return render_template('contact.html', title='Обратная связь', menu=menu)
+    else:
+        return redirect(url_for('log_in'))
 
-
-    return render_template('contact.html', title = 'Обратная связь', menu=menu)
 
 @app.errorhandler(404)
 def pageNotFound(error):
     return render_template('page404.html', title='404', menu=menu), 404
 
+
 @app.errorhandler(401)
 def pageNotYour(error):
     return render_template('page401.html', title='401', menu=menu), 401
+
 
 '''@app.route("/login", methods=["POST", "GET"])
 def login():
@@ -71,31 +87,47 @@ def login():
         return redirect(url_for('profile', username=session['userLogged']))
     elif request.method == 'POST' and request.form['username'] == 'imichael' and request.form['psw'] == "123":
         session['userLogged'] = request.form['username']
-        return redirect(url_for('profile', username=session['userLogged']))
+        return redirect(url_for('index', username=session['userLogged']))
 
     return render_template('login.html', title='Авторизация')'''
 
+
 @app.route("/rules")
 def rules():
-    return render_template('rules.html', title='Правила платформы')
+    return render_template('rules.html', title='Правила платформы', menu=menu)
 
+
+@app.route("/")
 @app.route("/login", methods=["GET", "POST"])
 def log_in():
-    login = request.form.get('login')
-    password = request.form.get('password')
-    if login and password:
-        print(login, password)
-    else:
-        return render_template('login.html')
+    if request.method == 'POST':
+        con = sqlite3.connect("users.sqlite")
+        cur = con.cursor()
+        result = cur.execute("""SELECT * FROM users""").fetchall()
+        con.commit()
+        bl = False
+        for el in result:
+            if el[1] == request.form['username'] and el[2] == request.form["password"]:
+                bl = True
+        if bl:
+            aut = True
+            id = el[0]
+            prof = el[1]
+            return redirect(url_for('main'))
+
+    return render_template('log.html', title='Войти', menu=menu)
 
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     pass
 
-@app.route("/registration", methods=["GET", "POST"])
+
+@app.route("/reg", methods=["GET", "POST"])
 def reg():
     pass
+
+
 
 '''
 with app.test_request_context():

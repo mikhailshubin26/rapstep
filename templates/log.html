@@ -2,22 +2,12 @@
 
 {% block content %}
 {{ super() }}
-<h1>Login Page</h1>
-
-<form method="POST">
-    <table>
-        <tr>
-            <td>Login</td>
-            <td><input type="text" name='login'></td>
-        </tr>
-        <tr>
-            <td>Password</td>
-            <td><input type="password" name="password"></td>
-        </tr>
-        <tr>
-            <td><a href="">Registration</td>
-            <td><input type="submit"></td>
-        </tr>
-    </table>
+{% for cat, msg in get_flashed_messages(True) %}
+<div class="flash {{cat}}">{{msg}}</div>
+{% endfor %}
+<form action="/login" method="post" class="form-contact">
+<p><label>Логин: </label><input type="text" name="username" value="" requied />
+<p><label>Проль: </label><input type="password" name="password" value="" requied />
+<p><input type="submit" value="Отправить" />
 </form>
 {% endblock %}
