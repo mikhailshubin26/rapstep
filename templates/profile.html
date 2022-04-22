@@ -2,5 +2,6 @@
 
 {% block content %}
 {{ super() }}
-<p><label>Найти человека</label><input type="text" name="username" value="" requied /><input type="submit" value="Найти"></p>
+<form action="/profile" method="post" class="form-profile">
+<p><label>Найти человека</label><input type="text" name="username" value="" requied /><input type="submit" value="Найти" requied /></p>
 {% endblock %}

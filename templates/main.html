@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}">
 {% block content %}
 {{ super() }}
-<p>Содержимое страницы
 {% endblock %}
+<p><a href="add"><input type="submit" name="add" value="Добавить"></a>

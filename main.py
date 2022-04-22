@@ -2,18 +2,33 @@ from flask import Flask, render_template, url_for, request, flash, session, redi
 from flask_login import LoginManager
 import sqlite3
 import os
+import bs4
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'emyKFWDVMQwGjzv5dgfhHgot12nsrhiNZ'
 manager = LoginManager()
 
 menu = [{"name": "Главная", "url": "main"},
-        {"name": "ЧЕКАНУТЬ ПРОФИЛЬ", "url": "/profile"},
+        {"name": "Пользователи", "url": "profile"},
         {"name": "КАНТА АКТЫ", "url": "/contact"},
         {"name": "Правила", "url": "/rules"},
-        {"name": "Войти", "url": "/login"},
+        {"name": "Войти", "url": "/logout"},
         {"name": "Зарегистрироваться", "url": "/reg"},
         {"name": "Выйти", "url": "/logout"}]
+
+src = None
+con = sqlite3.connect("users.sqlite")
+cur = con.cursor()
+sp = cur.execute("""SELECT * FROM home""").fetchall()
+con.commit()
+cur.close()
+pages = []
+for el in sp:
+    el = list(el)
+    pages.append([el[1], el[2], el[3][0:15], 'Перейти'])
+
+print(pages)
 
 
 @app.route("/main")
@@ -22,11 +37,42 @@ def main():
         return redirect(url_for('login'))
     else:
         print(url_for('main'))
+
         return render_template('main.html', menu=menu)
 
 
-@app.route("/profile", methods=["POST", "GET"])
+@app.route("/add", methods=['POST', 'GET'])
+def add():
+    if 'userLogged' not in session:
+        return redirect(url_for('login'))
+    else:
+        print(url_for('add'))
+        print(request.method)
+        if request.method == 'POST':
+            print(len(request.form['message']))
+            print(len(request.form['title']))
+            print(len(request.form['contact']))
+            if len(request.form['message']) > 15 or len(request.form['title']) > 5 or len(request.form['contact']) >= 0:
+                flash('Опубликовано', category='success')
+                con = sqlite3.connect("users.sqlite")
+                cur = con.cursor()
+                aut = session['userLogged']
+                tt = request.form['title']
+                ct = request.form['contact']
+                ms = request.form['message']
+                url = request.form['url']
+                cur.execute(f'INSERT INTO home (author, title, contact, message, url) VALUES ("{aut}" ,"{tt}", "{ct}", "{ms}", "{url}")')
+                con.commit()
+                cur.close()
+            else:
+                flash('Ошибка отправки. Слишком мало символов', category='error')
+
+        return render_template('add.html', menu=menu)
+
+
+@app.route("/profile", methods=['POST', 'GET'])
 def profile():
+    global src
     if 'userLogged' not in session:
         return redirect(url_for('login'))
     else:
@@ -36,6 +82,7 @@ def profile():
             search = cur.execute("""SELECT * FROM persons""")
             for el in search:
                 if el[1] == request.form['username']:
+                    src = request.form['username']
                     print("SHALOM")
                     return redirect("person")
 
@@ -44,7 +91,7 @@ def profile():
 
 @app.route("/person")
 def man():
-    return f"Пользователь: "
+    return f"Пользователь: {src}"
 
 
 @app.route("/contact", methods=["POST", "GET"])

@@ -41,6 +41,18 @@ ul.mainmenu li a:hover {
 	color: #FDA83D;
 }
 
+ul.pages {
+	list-style: none;
+	background: #62ffc6;
+	height: 400px;
+	margin: 0;
+	padding: 0;
+	color: #000000;
+	font-size: 30px;
+	title-size: 20px;
+	overflow: hidden;
+}
+
 div.content {
 	margin: 10px;
 }
