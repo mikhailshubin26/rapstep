@@ -10,6 +10,7 @@ app.config['SECRET_KEY'] = 'emyKFWDVMQwGjzv5dgfhHgot12nsrhiNZ'
 manager = LoginManager()
 
 menu = [{"name": "Главная", "url": "main"},
+        {"name": "Статьи", "url": "titles"},
         {"name": "Пользователи", "url": "profile"},
         {"name": "КАНТА АКТЫ", "url": "/contact"},
         {"name": "Правила", "url": "/rules"},
@@ -26,9 +27,20 @@ cur.close()
 pages = []
 for el in sp:
     el = list(el)
-    pages.append([el[1], el[2], el[3][0:15], 'Перейти'])
+    pages.append([el[1], el[2], el[3][0:15], el[0]])
 
 print(pages)
+print(sp)
+nsp = [{"name": f"{pages[-1][1]}", "url": f"{pages[-1][0]}"},
+       {"name": f"{pages[-2][1]}", "url": f"{pages[-2][0]}"},
+       {"name": f"{pages[-3][1]}", "url": f"{pages[-3][0]}"},
+       {"name": f"{pages[-4][1]}", "url": f"{pages[-4][0]}"},
+       {"name": f"{pages[-5][1]}", "url": f"{pages[-5][0]}"},
+       {"name": f"{pages[-6][1]}", "url": f"{pages[-6][0]}"},
+       {"name": f"{pages[-7][1]}", "url": f"{pages[-7][0]}"},
+       {"name": f"{pages[-8][1]}", "url": f"{pages[-8][0]}"},
+       {"name": f"{pages[-9][1]}", "url": f"{pages[-9][0]}"},
+       {"name": f"{pages[-10][1]}", "url": f"{pages[-10][0]}"}, ]
 
 
 @app.route("/main")
@@ -39,6 +51,25 @@ def main():
         print(url_for('main'))
 
         return render_template('main.html', menu=menu)
+
+@app.route("/titles")
+def titles():
+    if 'userLogged' not in session:
+        return redirect(url_for('login'))
+    else:
+        print(url_for('titles'))
+        all = ''
+        for i in range(0, 5):
+            all += f'{sp[i][1]}         {pages[i][3]}\n'
+            all += f'{sp[i][2]}\n'
+            all += f'{sp[i][4]}\n'
+            all += f'{sp[i][5]}\n\n\n\n\n'
+        # all += f'{sp[5][1]}          {sp[5][2]}'
+        # print(sp[5][1], sp[5][2], sp[5][3], sp[5][4], sp[5][5])
+        # print(all)
+        total = f"Статьи:\n{all}"
+        return total
+
 
 
 @app.route("/add", methods=['POST', 'GET'])
@@ -61,7 +92,8 @@ def add():
                 ct = request.form['contact']
                 ms = request.form['message']
                 url = request.form['url']
-                cur.execute(f'INSERT INTO home (author, title, contact, message, url) VALUES ("{aut}" ,"{tt}", "{ct}", "{ms}", "{url}")')
+                cur.execute(
+                    f'INSERT INTO home (author, title, contact, message, url) VALUES ("{aut}" ,"{tt}", "{ct}", "{ms}", "{url}")')
                 con.commit()
                 cur.close()
             else:

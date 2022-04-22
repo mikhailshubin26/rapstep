@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css')}}">
+<head>
+</head>
+<body>
+{% block content -%}
+    {%- block pages -%}
+<ul class="pages">
+    {% for e in sp -%}
+<li><a href="goog">Ок</a></li>
+    {% endfor -%}
+</ul>
+    {% endblock pages -%}
+</body>
+</html>

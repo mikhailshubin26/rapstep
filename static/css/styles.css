@@ -53,6 +53,20 @@ ul.pages {
 	overflow: hidden;
 }
 
+ul.pages li {
+	float: left;
+	margin: 100px 1000px 0 100px;
+}
+ul.pages li.last {float: right;}
+
+ul.pages li a {
+	color: #789012;
+	text-decoration: none;
+}
+ul.pages li a:hover {
+	color: #123456;
+}
+
 div.content {
 	margin: 10px;
 }
